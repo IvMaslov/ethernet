@@ -144,10 +144,8 @@ func (f *Frame) Marshal() ([]byte, error) {
 func (f *Frame) length() int {
 	l := 0
 
-	l += len(f.DestHarwAddr)
-	l += len(f.SrcHarwAddr)
-
-	l += 2
+	l += 12 // two MAC addresses
+	l += 2  // EtherType
 
 	if f.ServiceVLAN != nil {
 		l += 4
