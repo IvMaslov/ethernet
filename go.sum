@@ -1,4 +1,4 @@
-github.com/IvMaslov/socket v0.0.0-20240831144830-96f8acc61138 h1:GIkdDrelAXMIcxaY+JZ/Aj7C3pPM88HeCJwHtAfIX4E=
-github.com/IvMaslov/socket v0.0.0-20240831144830-96f8acc61138/go.mod h1:ko+D8uje6S7ekG3lG9utP6+Xnam8p3Ioesbj1tFo+Hk=
-github.com/IvMaslov/socket v0.0.0-20240915140105-462ec1eaaa87 h1:M2OQlROrorjvkX5LZ9N+flTl9FBR52hJ4UFaUjePyeQ=
-github.com/IvMaslov/socket v0.0.0-20240915140105-462ec1eaaa87/go.mod h1:ko+D8uje6S7ekG3lG9utP6+Xnam8p3Ioesbj1tFo+Hk=
+github.com/IvMaslov/netutils v0.0.0-20250613110239-cd931f021632 h1:UVtogTXI7hAiKzuKJOL4fvl71FwcSttAKQkSPZRDNnA=
+github.com/IvMaslov/netutils v0.0.0-20250613110239-cd931f021632/go.mod h1:8wuDrqweD5qifzHs2GUR1j9lako87YlIfsdyZe0Ezzc=
+github.com/IvMaslov/socket v0.0.0-20250613111109-788cc7fc69d5 h1:wRZOZ5VDd/mRzKb4c9SoQ1NnvUgMB4rwd3L+A3jDPT0=
+github.com/IvMaslov/socket v0.0.0-20250613111109-788cc7fc69d5/go.mod h1:tRvwAUJGFHMM15nySIKZG17zp6IrlWBG+EJMxHrETpU=

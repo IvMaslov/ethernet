@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"os"
 	"os/signal"
@@ -12,8 +11,14 @@ import (
 	"github.com/IvMaslov/socket"
 )
 
+// simple ethernet echo server
 func main() {
-	ifce, err := socket.New(socket.WithDevice("virbr0"))
+	sock, err := socket.New(socket.WithDevice("eth0"))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	etherSocker, err := ethernet.NewEtherSocket(sock, 0)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -24,7 +29,7 @@ func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 
 	go func() {
-		etherEcho(ctx, ifce)
+		etherEcho(ctx, etherSocker)
 		wg.Done()
 	}()
 
@@ -34,44 +39,30 @@ func main() {
 
 	<-sig
 
+	sock.Close()
+
 	cancel()
 	wg.Wait()
-
-	ifce.Close()
 }
 
-func etherEcho(ctx context.Context, ifce *socket.Interface) {
-	buf := make([]byte, 1500)
-
+func etherEcho(ctx context.Context, etherSock *ethernet.EtherSocket) {
 	for {
 		select {
 		case <-ctx.Done():
 			log.Println("Exiting from ether echo")
 			return
 		default:
-			n, err := ifce.Read(buf)
+			f, err := etherSock.ReadFrame()
 			if err != nil {
 				log.Println("ERROR with reading -", err)
-			}
-
-			f := &ethernet.Frame{}
-			err = f.Unmarshal(buf[:n])
-			if err != nil {
-				log.Println("ERROR with unmarshaling -", err)
 				continue
 			}
 
-			fmt.Printf("Packet %s -> %s | with len %d\n", f.SrcHarwAddr, f.DestHarwAddr, n)
+			log.Printf("Packet %s -> %s\n", f.SrcHarwAddr, f.DestHarwAddr)
 
 			f.DestHarwAddr, f.SrcHarwAddr = f.SrcHarwAddr, f.DestHarwAddr
 
-			data, err := f.Marshal()
-			if err != nil {
-				log.Println("ERROR with marshaling -", err)
-				continue
-			}
-
-			_, err = ifce.Write(data)
+			err = etherSock.Write(f.Payload)
 			if err != nil {
 				log.Println("ERROR with writing -", err)
 			}
