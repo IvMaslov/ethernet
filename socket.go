@@ -16,7 +16,7 @@ type EtherSocket struct {
 	mtu         int
 }
 
-// NewEtherSocket create ether socket over interface
+// NewEtherSocket create ether socket over device
 func NewEtherSocket(sock *socket.Interface) (*EtherSocket, error) {
 	es := &EtherSocket{
 		sock: sock,
@@ -40,6 +40,16 @@ func NewEtherSocket(sock *socket.Interface) (*EtherSocket, error) {
 	return es, nil
 }
 
+// Name returns device name
+func (es *EtherSocket) Name() string {
+	return es.sock.Name()
+}
+
+// MTU returns maximum transmission unit of device
+func (es *EtherSocket) MTU() int {
+	return es.mtu
+}
+
 // GetHWAddr returns mac address of device
 func (es *EtherSocket) GetHWAddr() net.HardwareAddr {
 	return es.sock.GetHardwareAddr()
@@ -52,7 +62,7 @@ func (es *EtherSocket) GetGatewayHWAddr() net.HardwareAddr {
 
 // Read returns payload of ethernet frame
 func (es *EtherSocket) Read() ([]byte, error) {
-	f, err := es.readFrame()
+	f, err := es.ReadFrame()
 	if err != nil {
 		return nil, err
 	}
@@ -60,12 +70,8 @@ func (es *EtherSocket) Read() ([]byte, error) {
 	return f.Payload, nil
 }
 
-// ReadFrame returns full thernet frame with payload
+// ReadFrame returns full ethernet frame with payload
 func (es *EtherSocket) ReadFrame() (*Frame, error) {
-	return es.readFrame()
-}
-
-func (es *EtherSocket) readFrame() (*Frame, error) {
 	buf := make([]byte, es.mtu)
 
 	n, err := es.sock.Read(buf)
