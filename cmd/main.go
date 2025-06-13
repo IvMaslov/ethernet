@@ -18,7 +18,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	etherSocker, err := ethernet.NewEtherSocket(sock, 0)
+	etherSocker, err := ethernet.NewEtherSocket(sock)
 	if err != nil {
 		log.Fatal(err)
 	}

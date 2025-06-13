@@ -8,24 +8,18 @@ import (
 	"github.com/IvMaslov/socket"
 )
 
-const defaultMTU = 1500
-
 type EtherSocket struct {
-	sock   *socket.Interface
-	inInfo *netutils.InterfaceInfo
-	mtu    int
+	// raw socket
+	sock *socket.Interface
+	// information about default gateway of socket
+	defaultInfo *netutils.InterfaceInfo
+	mtu         int
 }
 
-// NewEtherSocket create ether socket over interface with mtu.
-// if mtu == 0, default value is 1500
-func NewEtherSocket(sock *socket.Interface, mtu int) (*EtherSocket, error) {
+// NewEtherSocket create ether socket over interface
+func NewEtherSocket(sock *socket.Interface) (*EtherSocket, error) {
 	es := &EtherSocket{
 		sock: sock,
-		mtu:  mtu,
-	}
-
-	if mtu == 0 {
-		es.mtu = defaultMTU
 	}
 
 	// get info about defualt gateway of this interface
@@ -34,9 +28,26 @@ func NewEtherSocket(sock *socket.Interface, mtu int) (*EtherSocket, error) {
 		return nil, err
 	}
 
-	es.inInfo = &info
+	es.defaultInfo = &info
+
+	mtu, err := netutils.GetInterfaceMTU(sock.Name())
+	if err != nil {
+		return nil, err
+	}
+
+	es.mtu = mtu
 
 	return es, nil
+}
+
+// GetHWAddr returns mac address of device
+func (es *EtherSocket) GetHWAddr() net.HardwareAddr {
+	return es.sock.GetHardwareAddr()
+}
+
+// GetGatewayHWAddr returns mac address of device's default gateway
+func (es *EtherSocket) GetGatewayHWAddr() net.HardwareAddr {
+	return es.defaultInfo.HardAddr
 }
 
 // Read returns payload of ethernet frame
@@ -72,6 +83,7 @@ func (es *EtherSocket) readFrame() (*Frame, error) {
 	return f, nil
 }
 
+// WriteTo writes data to socket, with certain destination mac addr. Use Ether Type IPv4
 func (es *EtherSocket) WriteTo(to net.HardwareAddr, data []byte) error {
 	f := Frame{
 		DestHarwAddr: to,
@@ -83,9 +95,10 @@ func (es *EtherSocket) WriteTo(to net.HardwareAddr, data []byte) error {
 	return es.WriteFrame(&f)
 }
 
+// WriteTo writes data to socket, destination is default gateway. Use Ether Type IPv4
 func (es *EtherSocket) Write(data []byte) error {
 	f := Frame{
-		DestHarwAddr: es.inInfo.HardAddr,
+		DestHarwAddr: es.defaultInfo.HardAddr,
 		SrcHarwAddr:  es.sock.GetHardwareAddr(),
 		EtherType:    EtherTypeIPv4,
 		Payload:      data,
